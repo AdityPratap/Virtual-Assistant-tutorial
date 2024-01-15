@@ -62,8 +62,8 @@ def sendemail(to,content):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.ehlo()
     server.starttls()
-    server.login('aditya76820101@gmail.com','jncfedgyzldbwaaa')
-    server.sendmail('aditya76820101@gmail.com',to,content)
+    server.login('YOUR GMAIL-ID','YOUR GMAIL SECURITY KEY/CODE')
+    server.sendmail('YOUR GMAIL-ID',to,content)
     server.close()
 def News():
    data = requests.get("https://newsapi.org/v2/top-headlines?country=in&apiKey=11573b78b3b2483db0c9c93ba7f58d0c")
