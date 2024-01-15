@@ -1,0 +1,364 @@
+import operator
+from math import *
+from email import encoders, message
+from email.mime.base import MIMEBase
+from email.mime.nonmultipart import MIMENonMultipart
+from email.mime.text import MIMEText
+from operator import add, mul, sub
+import instadownloader
+import cv2
+from requests import get
+import pyttsx3
+import datetime
+import wikipedia
+import speech_recognition as sr
+import smtplib
+import pywhatkit as kit
+import pyaudio
+import sys
+import os
+import pyautogui as gui
+import random
+import webbrowser
+import PyPDF2
+from PyQt5 import QtCore,QtWidgets,QtGui
+from PyQt5.QtCore import QTimer,QTime,QDate,Qt
+from PyQt5.QtGui import QMovie
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.uic import loadUiType
+import jarvisui1
+import time
+import requests
+from requests import *
+from urllib import request
+from bs4 import BeautifulSoup
+import json 
+engine = pyttsx3.init("sapi5")
+voices = engine.getProperty('voices')
+engine.setProperty('voice',voices[0].id)
+def speak(audio):
+   engine.say(audio)
+   engine.runAndWait()
+
+def WishMe():
+    hour = int(datetime.datetime.now().hour)
+    tt = datetime.datetime.now().strftime("%I%M%p")
+    search = "temperarure in delhi"
+    url = f"https://www.google.com/search?q={search}"
+    r = requests.get(url)
+    data = BeautifulSoup(r.text,"html.parser")
+    sky = data.find("div",class_="BNeawe").text
+    if hour>=4 and hour<12:
+        speak(f"good morning sir,it's {tt}, temperature around you is {sky}")                     
+    elif hour>=12 and hour<16:
+        speak(f"good afternoon sir,it's {tt}, temperature around is {sky}")
+    elif hour>=16 and hour<22:
+        speak(f"good evening sir,it's {tt}, temperature around you is {sky}")
+    else:
+        speak(f"it's {tt},hello sir,               still awake!!!         , temperature around you is {sky}")
+def sendemail(to,content):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.login('aditya76820101@gmail.com','jncfedgyzldbwaaa')
+    server.sendmail('aditya76820101@gmail.com',to,content)
+    server.close()
+def News():
+   data = requests.get("https://newsapi.org/v2/top-headlines?country=in&apiKey=11573b78b3b2483db0c9c93ba7f58d0c")
+   result = data.json()
+   print(result['status'])
+   # print(result)
+   news = result['articles']
+   speak("sir here are some latest news")
+   speak("So our first news is ")
+   for i  in range(0,10):
+        print(i)
+        print(news[i]['description'])
+        speak(news[i]['description'])
+        if i>=9:
+            break
+        time.sleep(2)
+        if i == 8:
+            speak("So our last news for today is ")
+        else:
+            speak("Moving To Our next news")
+class MainThread(QThread):
+    def __init__(self):
+        super(MainThread,self).__init__()
+    def run(self):
+        self.TaskExecution()
+    def takecommand(self):
+        s = sr.Recognizer()
+        with sr.Microphone() as source:
+            print("waiting for your command sir.....")
+            s.pause_threshold = 1
+            audio = s.listen(source)
+            s.adjust_for_ambient_noise(source)
+        try:
+            print("Recognising it sir....")
+            query = s.recognize_google(audio,language="en-in")
+            print(f"if i am not wrong sir, you just said:",query)
+        except:
+            print("could you please repeat your words sir")
+            speak("could you please repeat your words sir") 
+            return "none"
+        return query
+
+    def TaskExecution(self):
+        WishMe()
+        while True:
+            self.query = self.takecommand().lower()
+            if "wikipedia" in self.query:
+                speak("searching wikipedia sir..")
+                self.query = self.query.replace("wikipedia","")
+                results = wikipedia.summary(self.query,sentences=4)
+                speak("sir according to wikipedia")
+                print(results)
+                speak(results)
+            elif "open documents" in self.query:
+                speak("alright sir")
+                c ="C:\\Users\\adity\\AppData\\Local\\Programs\\documents"
+                os.startfile(c)
+            elif "close documents" in self.query:
+                speak("alright clossing it sir")
+                os.system("taskkill/f/im documents")
+            elif "IP address" in self.query:
+                ip = get("https://api.ipify.org").text
+                speak(f"the ip address of this device is {ip}")
+            elif 'open google' in self.query:
+                speak("what are we looking for sir..")
+                cm = self.takecommand().lower()
+                webbrowser.open(f"google.com/{cm}")
+            elif'open youtube' in self.query:
+                speak("what are we looking for")
+                l = self.takecommand().lower()
+                kit.playonyt(f"{l}")
+            elif 'play songs' in self.query:
+                l = self.takecommand().lower()
+                kit.playonyt(f"{l}")
+            elif 'open instagram' in self.query:
+                webbrowser.open("instagram.com")
+            elif 'open facebook' in self.query:
+                webbrowser.open("facebook.com")
+            elif 'open twitter' in self.query:
+                webbrowser.open("twitter.com")
+            elif 'open code' in self.query:
+                path = "C:\\Users\\adity\\OneDrive\\Desktop\\Visual Studio Code.lnk"
+                os.startfile(path)
+            elif 'open downloads' in self.query:
+                speak("sure sir opening")
+                p = "C:\\Users\\adity\\Downloads"
+                os.startfile(p)
+            elif 'open pictures' in self.query:
+                p = "C:\\Users\\adity\\OneDrive\\Pictures"
+                os.startfile(p)
+            elif 'open videos' in self.query:
+                v = "C:\\Users\\adity\\Videos"
+                os.startfile(v)
+            elif 'time' in self.query:
+                strTime = datetime.datetime.now().strftime("%H:%M:%S")
+                speak(f"the time is{strTime}")
+            elif 'close window' in self.query:
+                gui.hotkey('ctrl', 'shift', 'w')
+            elif "volume up" in self.query:
+                speak("How much should i raise it up sir?")
+                print("How much should I raise it up sir?")                
+                l = self.takecommand().lower()
+                s = int(l)
+                for i in range(0,s):
+                    gui.press("volumeup")
+            elif "volume up" in self.query:
+                speak("How much lower sir?")
+                print("How much lower sir?")                
+                l = self.takecommand().lower()
+                s = int(l)
+                for i in range(0,s):
+                    gui.press("volumedown")
+            elif 'send email' in self.query:
+                try:
+                    speak("please enter the recievers mail id sir")
+                    to = input("enter the recievers mail id : ")
+                    speak("what should i say")
+                    content = self.takecommand().lower()
+                    sendemail(to,content)
+                    speak("email has been sent successfully")
+                    if 'send a file' in self.query:
+                        speak("please enter recievers mail id sir")
+                        to = input("enter the mail id : ")
+                        speak("what is the subject for this email sir")
+                        q1 = self.takecommand().lower()
+                        speak("and what about the message or the content for the recievers ")
+                        q2 = input("enter the content")
+                        speak("please enter the file path sir")
+                        fpath = input("enter the file path sir:")
+                        msg = MIMENonMultipart()
+                        msg['FROM'] = 'aditya76820101@gmail.com'
+                        msg['to'] = to
+                        msg['subject'] = q1
+                        msg.attach(MIMEText(message,'plain'))
+                        filename = os.path.basename(fpath)
+                        attachment = open(fpath,"rb")
+                        part = MIMEBase('application','octet-stream')
+                        part.set_payload(attachment.read())
+                        encoders.encode_base64(part)
+                        part.add_header("content - disposition","attachment;filename=%s"%filename)
+                        msg.attach(part)
+                        sendemail(to,content)
+                        speak("email has been sent")
+                except:
+                    speak("sorry sir but i am unable to send the mail at this moment")
+            # elif 'where am i' or 'where we are ' in self.query:
+            #     speak("let me check sir, just a second")
+            #     try:
+            #         ipAdd = requests.get('https://api.ipify.org').text
+            #         print(ipAdd)
+            #         url = 'https://get.geojs.io/v1/ip/geo/'+ipAdd+'.json'
+            #         geo_requests = requests.get(url)
+            #         geo_data = geo_requests.json()
+            #         city = geo_data['city']
+            #         country = geo_data['country']
+            #         speak(f"sir i am not sure, but according to my search we are in {city} city of {country} country")
+            #         break
+            #     except Exception as e:
+            #        speak("sorry sir, due to some network issues currently i am not able to get our location.")            
+            elif 'open camera' in self.query:
+                cpath = cv2.VideoCapture(0)
+                while True:
+                    ret,img = cpath.read()
+                    cv2.imshow('webcam',img)
+                    k = cv2.waitKey(10)
+                    if k == 27:
+                        break;
+                cpath.release()
+                cv2.destroyAllWindows()
+            elif "calculate" in self.query:
+                r = sr.Recognizer()
+                with sr.Microphone() as source:
+                    speak("ready")
+                    print("Listning...")
+                    r.adjust_for_ambient_noise(source)
+                    audio = r.listen(source)
+                    my_string=r.recognize_google(audio)
+                    print(my_string)
+                def get_operator_fn(op):
+                    return {
+                    '+' : operator.add,
+                    '-' : operator.sub,
+                    'x' : operator.mul,
+                    'divided' : operator.__truediv__,
+                    }[op]
+                def eval_bianary_expr(op1,oper, op2):
+                    op1,op2 = int(op1), int(op2)
+                    return get_operator_fn(oper)(op1, op2)
+                speak("your result is")
+                speak(eval_bianary_expr(*(my_string.split())))
+            elif 'Instagram profile' in self.query:
+                speak("please enter the profile name sir")
+                n = input("profile name to be searched")
+                webbrowser.open(f"instagram.com/{n}")
+                time.sleep(4)
+                speak("sir do you want to download your profile picture")
+                condition = self.takecommand().lower()
+                if 'yes' in condition :
+                    mod = instadownloader.InstaDownloader()
+                    mod.profile(n,profile_pic_only = True)
+                    speak("task completed sir your pic is loaded into our main folder")
+                else:
+                    pass
+            elif "refresh" in self.query:
+                gui.moveTo(1551,551, 2)
+                gui.click(x=1551, y=551, clicks=1, interval=0, button='right')
+                gui.moveTo(1620,667, 1)
+                gui.click(x=1620, y=667, clicks=1, interval=0, button='left')
+            elif 'type' in self.query: #10
+                self.query = self.query.replace("type", "")
+                gui.write(f"{self.query}")
+            elif 'switch the tab' in self.query:
+                speak("ok sir")
+                gui.keyDown('alt')
+                gui.press('Tab')
+                time.sleep(1)
+                gui.keyUp('alt')
+            elif 'close chrome' in self.query:
+                os.system("taskkill /f /im chrome.exe")
+            elif 'close youtube' in self.query:
+                os.system("taskkill /f /im msedge.exe")
+            elif 'youtube search' in self.query:
+                self.query = self.query.replace("youtube search", "")
+                gui.hotkey('alt', 'd')
+                time.sleep(1)
+                gui.press('tab')
+                gui.press('tab')
+                gui.press('tab')
+                gui.press('tab')
+                time.sleep(1)
+                gui.write(f"{self.query}", 0.1)
+                gui.press('enter')
+            elif 'open new window' in self.query:
+                gui.hotkey('ctrl', 'n')
+            elif 'open incognito window' in self.query:
+                gui.hotkey('ctrl', 'shift', 'n')
+            elif 'maximize this window' in self.query:
+                gui.hotkey('alt', 'space')
+                time.sleep(1)
+                gui.press('x')
+            elif 'minimise this window' in self.query:
+                gui.hotkey('alt', 'space')
+                time.sleep(1)
+                gui.press('n')
+            elif 'open history' in self.query:
+                gui.hotkey('ctrl', 'h')
+            elif 'open downloads' in self.query:
+                gui.hotkey('ctrl', 'j')
+            elif 'previous tab' in self.query:
+                gui.hotkey('ctrl', 'shift', 'tab')
+            elif 'next tab' in self.query:
+                gui.hotkey('ctrl', 'tab')
+            elif 'close tab' in self.query:
+                gui.hotkey('ctrl', 'w')
+            elif 'close window' in self.query:
+                gui.hotkey('ctrl', 'shift', 'w')
+            elif 'clear browsing history' in self.query:
+                gui.hotkey('ctrl', 'shift', 'delete')
+            elif 'daily news' in self.query:
+                speak("sure sir just give me a minute to fetch the latest ones")
+                News()
+            elif 'shut the system' in self.query:
+                os.system("shutdown /s /t 5")
+            elif 'get the system on sleep ' in self.query:
+                os.system("rundll32.exe powrprof.dil SetSuspendState 0,1,0")
+            elif "sleep jarvis" in self.query:
+                speak("sure sir as you say")
+                sys.exit()
+startExecution = MainThread()
+class Main(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = jarvisui1.Ui_jarvisui1() 
+        self.ui.setupUi(self)
+        self.ui.pushButton.clicked.connect(self.startTask)
+        self.ui.pushButton_2.clicked.connect(self.close)
+    def startTask(self):
+        self.ui.movie = QtGui.QMovie("C:\\Users\\lenovo\\OneDrive\\Pictures\\jarvis gui\\HUD.gif")
+        self.ui.label.setMovie(self.ui.movie)
+        self.ui.movie.start()
+        self.ui.movie = QtGui.QMovie("C:\\Users\\lenovo\\OneDrive\\Pictures\\jarvis gui\\Jarvis_Loading_Screen.gif")
+        self.ui.label_2.setMovie(self.ui.movie)
+        self.ui.movie.start()
+        timer = QTimer(self)
+        timer.timeout.connect(self.showTime)
+        timer.start(1000)
+        startExecution.start()
+    def showTime(self):
+        current_time = QTime.currentTime()
+        now = QDate.currentDate()
+        label_time = current_time.toString('hh:mm:ss')
+        label_date = now.toString(Qt.ISODate)
+        self.ui.textBrowser.setText(label_time)
+        self.ui.textBrowser_2.setText(label_date)
+app = QApplication(sys.argv)
+jarvis1 = Main()
+jarvis1.show()
+exit(app.exec_())
